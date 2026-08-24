@@ -1,0 +1,30 @@
+# Secrets - never commit
+.env
+hopsworks_certs/
+tmp/
+
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Data - regenerable via backfill scripts, and too large for git
+data/processed/*.csv
+data/raw/*.csv
+
+# Models - regenerable via train_hourly.py
+models/*.pkl
+models/*.csv
+
+# Generated reports
+reports/
+
+# Local scratch
+check.py
+check_hopsworks.py
+join_weather.py
+rebuild.py
+audit.py
