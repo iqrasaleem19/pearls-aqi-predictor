@@ -1,0 +1,47 @@
+name: Hourly feature pipeline
+
+# Runs every hour, fetches the latest reading, and writes engineered
+# features to Hopsworks. Nothing is stored in the repo - the feature
+# group is the source of truth, so the job is fully stateless.
+#
+# Note on scheduling: GitHub's cron is best-effort and commonly runs
+# several minutes late, occasionally skipping entirely under load. The
+# pipeline is idempotent and self-healing (it recomputes from the stored
+# tail), so a missed hour is filled by the next successful run.
+
+on:
+  schedule:
+    - cron: "5 * * * *"   # five past each hour, UTC
+  workflow_dispatch:       # allows a manual run from the Actions tab
+
+concurrency:
+  # Two runs writing the same feature group at once would race on the
+  # same primary keys.
+  group: feature-pipeline
+  cancel-in-progress: false
+
+jobs:
+  update-features:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run hourly feature pipeline
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          HOPSWORKS_PROJECT: ${{ secrets.HOPSWORKS_PROJECT }}
+        run: python -m src.feature_pipeline.hourly_update
