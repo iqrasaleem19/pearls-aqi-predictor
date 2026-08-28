@@ -51,7 +51,7 @@ packaging==26.3
 pandas==2.3.3
 pillow==12.3.0
 plotly==6.9.0
-protobuf==7.35.1
+protobuf==4.25.8
 pyarrow==24.0.0
 pyasn1==0.6.4
 pyasn1_modules==0.4.2
