@@ -136,6 +136,23 @@ html, body, [class*="css"] {{
 }}
 .window b {{ color: {BONE}; font-weight: 400; }}
 
+.alert {{
+    border: 1px solid; border-left-width: 3px; border-radius: 3px;
+    padding: .95rem 1.15rem; margin-bottom: 1.1rem;
+    background: {SURFACE};
+}}
+.alert .head {{
+    font-family: 'IBM Plex Mono', monospace; font-size: .66rem;
+    letter-spacing: .18em; text-transform: uppercase; font-weight: 500;
+}}
+.alert .msg {{
+    font-size: .93rem; line-height: 1.55; margin-top: .4rem; color: {BONE};
+}}
+.alert .qual {{
+    font-family: 'IBM Plex Mono', monospace; font-size: .7rem;
+    color: {LABEL}; margin-top: .45rem;
+}}
+
 .now {{
     background: linear-gradient(160deg, {SURFACE} 0%, #0d1a27 100%);
     border: 1px solid {EDGE}; border-radius: 3px; padding: 1.4rem 1.5rem 1.3rem;
@@ -455,6 +472,80 @@ def daily_outlook(fc, now_ts, current):
     return sorted(out, key=lambda r: r["date"])
 
 
+# AQI above this is "Unhealthy" for everyone, not just sensitive groups -
+# the point at which a warning is worth interrupting someone for.
+ALERT_THRESHOLD = 150
+
+
+def build_alert(fc, current, now_ts):
+    """
+    Finds the worst forecast hour that crosses into unhealthy air.
+
+    Alerts on the FORECAST rather than the current reading, because
+    knowing tomorrow will be bad is actionable in a way that knowing
+    today is bad is not - by then the exposure has happened.
+
+    The alert carries its own uncertainty. At +72h the typical error is
+    around 35 AQI points, so a forecast of 160 could plausibly be 125 or
+    195. Stating the peak without that spread would overclaim what this
+    model knows, so the band is shown and the wording stays hedged at
+    long range.
+    """
+    if fc is None or len(fc) == 0:
+        return None
+
+    breaches = fc[fc["aqi"] > ALERT_THRESHOLD]
+    if breaches.empty:
+        # Current air can be unhealthy even when nothing ahead is.
+        if current > ALERT_THRESHOLD:
+            lab, col, guide = categorise(current)
+            return {"label": lab, "colour": col, "guide": guide,
+                    "peak": current, "when": now_ts, "err": 0.0,
+                    "now": True, "hours": 0}
+        return None
+
+    worst = breaches.loc[breaches["aqi"].idxmax()]
+    first = breaches.iloc[0]
+    lab, col, guide = categorise(float(worst["aqi"]))
+    err = float(worst["rmse"]) if worst["rmse"] == worst["rmse"] else 0.0
+
+    return {
+        "label": lab, "colour": col, "guide": guide,
+        "peak": float(worst["aqi"]), "when": worst["ts"],
+        "err": err, "now": False,
+        "hours": int(first["horizon"]),
+        "starts": first["ts"], "n": len(breaches),
+    }
+
+
+def render_alert(a):
+    """Renders the banner. Wording weakens as the horizon lengthens."""
+    if a["now"]:
+        head = f'{a["label"]} air now'
+        msg = f'Air quality has reached {a["peak"]:.0f}. {a["guide"]}'
+        qual = ""
+    else:
+        # Beyond a day the error band is wide enough that a flat
+        # prediction would mislead, so the verb softens.
+        verb = "expected" if a["hours"] <= 24 else "possible"
+        head = f'{a["label"]} air {verb}'
+        msg = (f'Air quality is forecast to reach about {a["peak"]:.0f} '
+               f'around {a["when"]:%A %d %b, %H:%M}. {a["guide"]}')
+        qual = (f'First crossing {a["starts"]:%a %H:%M} '
+                f'(+{a["hours"]}h) · {a["n"]} forecast '
+                f'hour{"s" if a["n"] != 1 else ""} above {ALERT_THRESHOLD}')
+        if a["err"] > 0:
+            qual += f' · typical error ±{a["err"]:.0f} at that range'
+
+    st.markdown(
+        f'<div class="alert" style="border-color:{a["colour"]}66; '
+        f'border-left-color:{a["colour"]}">'
+        f'<div class="head" style="color:{a["colour"]}">{head}</div>'
+        f'<div class="msg">{msg}</div>'
+        + (f'<div class="qual">{qual}</div>' if qual else "")
+        + '</div>', unsafe_allow_html=True)
+
+
 def curve_figure(hist, fc, now_ts, current):
     """
     The signature element: the forecast fades as skill decays.
@@ -572,6 +663,10 @@ def main():
             f'&nbsp; · &nbsp;{int(fc["horizon"].max())} hours ahead'
             f'&nbsp; · &nbsp;{len(fc)} points&nbsp; · &nbsp;local time</div>',
             unsafe_allow_html=True)
+
+    alert = build_alert(fc, current, now_ts)
+    if alert:
+        render_alert(alert)
 
     left, right = st.columns([1, 2.1], gap="large")
 
