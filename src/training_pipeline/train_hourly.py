@@ -502,7 +502,7 @@ def main():
         print(f"  {name:20s} all={np.mean(vals):6.2f}   at 24/48/72h={np.mean(sub):6.2f}")
 
     # Deployment models: one per reporting horizon, fit on everything.
-    for hz in REPORT_HORIZONS:
+    for hz in HORIZONS:
         if hz not in curve:
             continue
         best = min(curve[hz], key=lambda k: curve[hz][k]["rmse"])
