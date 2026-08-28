@@ -11,16 +11,13 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Data - regenerable via backfill scripts, and too large for git
-data/processed/*.csv
+# Intermediate data - regenerable, not needed by the dashboard.
+# features.csv IS committed so the deployed app has data to read.
+data/processed/weather_history.csv
+data/processed/features.pre_weather.csv
+data/processed/features_400d_backup.csv
+data/processed/test_export.csv
 data/raw/*.csv
-
-# Models - regenerable via train_hourly.py
-models/*.pkl
-models/*.csv
-
-# Generated reports
-reports/
 
 # Local scratch
 check.py
