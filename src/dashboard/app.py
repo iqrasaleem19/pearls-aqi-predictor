@@ -64,6 +64,10 @@ EDGE = "#1e3346"
 HAZE = "#7c93a8"
 BONE = "#e6ecf1"
 SODIUM = "#e0a355"
+# HAZE is for decorative chrome only. Anything a reader has to actually
+# read - labels, units, captions - uses LABEL, which clears WCAG AA
+# against the ink background where HAZE does not.
+LABEL = "#a6bccf"
 
 CATEGORIES = [
     (50, "Good", "#5b9c78", "Fine for outdoor activity."),
@@ -102,6 +106,14 @@ CSS = f"""
 }}
 #MainMenu, footer, header {{ visibility: hidden; }}
 .block-container {{ padding-top: 2.4rem; max-width: 1200px; }}
+/* Streamlit applies its own colour and opacity to markdown wrappers,
+   which washes out mono numerals set at light weights. */
+.stMarkdown, .stMarkdown p, [data-testid="stMarkdownContainer"] {{
+    color: {BONE}; opacity: 1;
+}}
+.cell .v, .metric .v, .day .avg, .tomorrow .val, .hrow .num {{
+    -webkit-font-smoothing: antialiased;
+}}
 html, body, [class*="css"] {{
     font-family: 'IBM Plex Sans', system-ui, sans-serif; color: {BONE};
 }}
@@ -115,12 +127,12 @@ html, body, [class*="css"] {{
     font-size: 2.05rem; letter-spacing: -.015em; margin: 0; color: {BONE};
 }}
 .masthead .place {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .71rem;
-    letter-spacing: .22em; text-transform: uppercase; color: {HAZE};
+    font-family: 'IBM Plex Mono', monospace; font-size: .72rem;
+    letter-spacing: .22em; text-transform: uppercase; color: {LABEL};
 }}
 .window {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .73rem;
-    color: {HAZE}; letter-spacing: .04em; margin: .6rem 0 1.5rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: .74rem;
+    color: {LABEL}; letter-spacing: .04em; margin: .6rem 0 1.5rem;
 }}
 .window b {{ color: {BONE}; font-weight: 400; }}
 
@@ -129,8 +141,8 @@ html, body, [class*="css"] {{
     border: 1px solid {EDGE}; border-radius: 3px; padding: 1.4rem 1.5rem 1.3rem;
 }}
 .eyebrow {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .65rem;
-    letter-spacing: .2em; text-transform: uppercase; color: {HAZE};
+    font-family: 'IBM Plex Mono', monospace; font-size: .66rem;
+    letter-spacing: .2em; text-transform: uppercase; color: {LABEL};
 }}
 .reading {{
     font-family: 'Fraunces', Georgia, serif; font-weight: 300;
@@ -138,13 +150,13 @@ html, body, [class*="css"] {{
     margin: .45rem 0 .1rem;
 }}
 .band {{ font-size: .94rem; font-weight: 500; margin-bottom: .45rem; }}
-.guide {{ font-size: .83rem; color: {HAZE}; line-height: 1.5; }}
+.guide {{ font-size: .85rem; color: {LABEL}; line-height: 1.55; }}
 
 .scale {{ display: flex; gap: 2px; margin: .95rem 0 .2rem; }}
 .scale span {{ flex: 1; height: 3px; border-radius: 1px; }}
 .scale-label {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .6rem;
-    color: {HAZE}; letter-spacing: .1em; display: flex;
+    font-family: 'IBM Plex Mono', monospace; font-size: .62rem;
+    color: {LABEL}; letter-spacing: .1em; display: flex;
     justify-content: space-between;
 }}
 
@@ -155,16 +167,16 @@ html, body, [class*="css"] {{
 }}
 .tomorrow .val {{
     font-family: 'IBM Plex Mono', monospace; font-size: 2.2rem;
-    font-weight: 300; line-height: 1.15; margin-top: .25rem;
+    font-weight: 400; line-height: 1.15; margin-top: .25rem;
 }}
 .tomorrow .spread {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .71rem;
-    color: {HAZE}; margin-top: .28rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: .72rem;
+    color: {LABEL}; margin-top: .28rem;
 }}
 
 .section {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .67rem;
-    letter-spacing: .2em; text-transform: uppercase; color: {HAZE};
+    font-family: 'IBM Plex Mono', monospace; font-size: .68rem;
+    letter-spacing: .2em; text-transform: uppercase; color: {LABEL};
     margin: 2rem 0 .75rem; padding-bottom: .4rem;
     border-bottom: 1px solid {EDGE};
 }}
@@ -176,13 +188,13 @@ html, body, [class*="css"] {{
 }}
 .cell .k {{
     font-family: 'IBM Plex Mono', monospace; font-size: .63rem;
-    letter-spacing: .14em; text-transform: uppercase; color: {HAZE};
+    letter-spacing: .14em; text-transform: uppercase; color: {LABEL};
 }}
 .cell .v {{
-    font-family: 'IBM Plex Mono', monospace; font-size: 1.42rem;
-    font-weight: 300; margin-top: .3rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 1.45rem;
+    font-weight: 400; color: {BONE}; margin-top: .3rem;
 }}
-.cell .u {{ font-size: .68rem; color: {HAZE}; margin-left: .25rem; }}
+.cell .u {{ font-size: .68rem; color: {LABEL}; margin-left: .3rem; }}
 
 .day {{
     flex: 1 1 180px; background: {SURFACE}; border: 1px solid {EDGE};
@@ -190,15 +202,15 @@ html, body, [class*="css"] {{
 }}
 .day .d {{
     font-family: 'IBM Plex Mono', monospace; font-size: .66rem;
-    letter-spacing: .16em; text-transform: uppercase; color: {HAZE};
+    letter-spacing: .16em; text-transform: uppercase; color: {LABEL};
 }}
 .day .avg {{
     font-family: 'IBM Plex Mono', monospace; font-size: 2rem;
-    font-weight: 300; line-height: 1.2; margin: .3rem 0 .1rem;
+    font-weight: 400; line-height: 1.2; margin: .3rem 0 .1rem;
 }}
 .day .lab {{ font-size: .78rem; font-weight: 500; margin-bottom: .5rem; }}
 .day .rng {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .68rem; color: {HAZE};
+    font-family: 'IBM Plex Mono', monospace; font-size: .69rem; color: {LABEL};
 }}
 
 .rows {{ margin-top: .2rem; }}
@@ -209,14 +221,15 @@ html, body, [class*="css"] {{
 }}
 .hrow:last-child {{ border-bottom: none; }}
 .hrow .when {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .71rem; color: {HAZE};
+    font-family: 'IBM Plex Mono', monospace; font-size: .72rem; color: {LABEL};
 }}
 .hrow .bar {{ height: 3px; background: {EDGE}; border-radius: 2px; }}
 .hrow .fill {{
     display: block; height: 3px; border-radius: 2px; background: {SODIUM};
 }}
 .hrow .num {{
-    font-family: 'IBM Plex Mono', monospace; font-size: 1rem; text-align: right;
+    font-family: 'IBM Plex Mono', monospace; font-size: 1.02rem;
+    font-weight: 400; text-align: right;
 }}
 
 .model {{
@@ -229,16 +242,16 @@ html, body, [class*="css"] {{
     font-weight: 300; color: {BONE};
 }}
 .model .sub {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .65rem;
-    color: {HAZE}; letter-spacing: .1em; margin-top: .2rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: .66rem;
+    color: {LABEL}; letter-spacing: .1em; margin-top: .2rem;
 }}
 .metric .k {{
     font-family: 'IBM Plex Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: {HAZE};
+    letter-spacing: .14em; text-transform: uppercase; color: {LABEL};
 }}
 .metric .v {{
-    font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem;
-    font-weight: 300; margin-top: .25rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 1.38rem;
+    font-weight: 400; color: {BONE}; margin-top: .25rem;
 }}
 
 .feat {{
@@ -246,16 +259,16 @@ html, body, [class*="css"] {{
     gap: .8rem; padding: .3rem 0;
 }}
 .feat .fn {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .71rem; color: {HAZE};
+    font-family: 'IBM Plex Mono', monospace; font-size: .72rem; color: {LABEL};
 }}
 .feat .fb {{ height: 9px; border-radius: 1px; background: {SODIUM}; opacity: .8; }}
 
 .note {{
-    font-family: 'IBM Plex Mono', monospace; font-size: .65rem;
-    color: {HAZE}; letter-spacing: .04em; margin-top: .55rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: .68rem;
+    color: {LABEL}; letter-spacing: .03em; margin-top: .55rem;
 }}
 .foot {{
-    font-size: .75rem; color: {HAZE}; line-height: 1.65;
+    font-size: .78rem; color: {LABEL}; line-height: 1.7;
     margin-top: 1.1rem; max-width: 78ch;
 }}
 </style>
