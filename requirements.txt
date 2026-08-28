@@ -7,5 +7,4 @@ requests
 python-dotenv
 streamlit
 plotly
-
 matplotlib
