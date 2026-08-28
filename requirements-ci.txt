@@ -1,0 +1,5 @@
+-r requirements.txt
+hopsworks==5.0.4
+confluent-kafka
+deltalake
+shap
